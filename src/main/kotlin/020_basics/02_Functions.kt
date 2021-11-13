@@ -1,4 +1,4 @@
-package `002_basics`
+package `020_basics`
 
 fun main() {
     println("Max is ${max(10, 6)}")
