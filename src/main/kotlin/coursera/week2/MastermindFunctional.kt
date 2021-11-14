@@ -7,6 +7,6 @@ import kotlin.math.min
 
 fun evaluateGuess2(secret: String, guess: String): Evaluation {
     val rightPositions: Int = secret.zip(guess).count { it.first == it.second }
-    val commonLetters: Int = "ABCDEF".sumOf { min(secret.count { x -> x == it }, guess.count { x -> x == it }) }
+    val commonLetters: Int = "ABCDEF".sumOf { ch -> min(secret.count { ch == it }, guess.count { ch == it }) }
     return Evaluation(rightPositions, commonLetters - rightPositions)
 }
