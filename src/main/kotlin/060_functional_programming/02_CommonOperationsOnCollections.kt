@@ -52,9 +52,33 @@ fun main() {
     // println("first > 32? -> ${employees.first { it.age > 42 }}")
     println()
 
+    // last: returns the last element (throws an exception if the collection is empty)
+    println("employees.last() -> ${employees.last()}") // Employee(name=Lina, age=35)
+    println()
+
+    // lastOrNull:  returns the last element, or `null` if the list is empty.
+    println("employees.lastOrNull() -> ${employees.lastOrNull()}") // Employee(name=Lina, age=35)
+    println()
+
     // count: counts the number of elements that meet a criteria/predicate
     println("count > 32? -> ${employees.count { it.age > 32 }}") // 1
     println("count > 22? -> ${employees.count { it.age > 22 }}") // 4
+    println()
+
+    // distinct: returns a list containing only distinct elements from the given collection.
+    val distinctAges = employees.map { it.age }.distinct()
+    println("distinctAges -> $distinctAges") // [27, 30, 35]
+    println()
+
+    // maxBy: returns the first element yielding the largest value of the given function or `null` if there are
+    // no elements.
+    println("employees.maxByOrNull { it.age } -> ${employees.maxByOrNull { it.age }}") // Employee(name=Lina, age=35)
+    println()
+
+    // getOrElse: returns an element at the given [index] or the result of calling the [defaultValue]
+    // function if the [index] is out of bounds of this list.
+    val (name, age) = employees.getOrElse(100) { x -> Employee("Unknown $x", -1) }
+    println("getOrElse -> $name, $age")
     println()
 
     // partition: divide the collection into 2 groups: the elements that meet the given criteria/predicate, and the
@@ -151,9 +175,10 @@ fun main() {
     // Employee(name=Ola, age=39),
     // Employee(name=Basel, age=25)
     // ]
+    println()
 
-    // flatMap:
-    val allThirtyPlus = allEmployees.flatMap { it -> it.filter { it.age >= 30 } }
+    // flatMap: perform a function on every sub-list and then return one list of all the elements inside the sub-lists.
+    val allThirtyPlus = allEmployees.flatMap { employeesList -> employeesList.filter { it.age >= 30 } }
     println("allThirtyPlus -> $allThirtyPlus")
     // [
     // Employee(name=Ali, age=30),
