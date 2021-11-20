@@ -33,11 +33,25 @@ data class Trip(
 fun TaxiPark.findFakeDrivers(): Set<Driver> =
     allDrivers.filter { driver -> trips.none { trip -> trip.driver == driver } }.toSet()
 
+// another solution:
+fun TaxiPark.findFakeDrivers2(): Set<Driver> = allDrivers - trips.map { it.driver }.toSet()
+// the second solution is doing 1 iteration over the map
+// which make it a little better than the first one in which in the worst case scenario
+// will call the none function from the trips for every driver.
+
 /*
  * Task #2. Find all the clients who completed at least the given number of trips.
  */
 fun TaxiPark.findFaithfulPassengers(minTrips: Int): Set<Passenger> =
     allPassengers.filter { passenger -> trips.count { trip -> passenger in trip.passengers } >= minTrips }.toSet()
+
+// another solution:
+fun TaxiPark.findFaithfulPassengers2(minTrips: Int): Set<Passenger> =
+    trips
+        .flatMap(Trip::passengers)
+        .groupBy { passenger -> passenger }
+        .filterValues { group -> group.size >= minTrips }
+        .keys
 
 /*
  * Task #3. Find all the passengers, who were taken by a given driver more than once.
@@ -54,12 +68,39 @@ fun TaxiPark.findSmartPassengers(): Set<Passenger> =
     trips
         .flatMap { trip -> trip.passengers.map { passenger -> passenger to trip.discount } }
         .groupBy { it.first }
-        .filter { (_, discounts) ->
+        .filterValues { discounts ->
             val (discounted, notDiscounted) = discounts.partition { it.second != null }
             discounted.size > notDiscounted.size
         }
-        .map { it.key }
-        .toSet()
+        .keys
+
+// another solution
+fun TaxiPark.findSmartPassengers2(): Set<Passenger> {
+    val (tripsWithDiscounts, tripsWithoutDiscounts) = trips.partition { it.discount != null }
+
+    return allPassengers
+        .filter { passenger ->
+            tripsWithDiscounts.count { passenger in it.passengers } >
+                    tripsWithoutDiscounts.count { passenger in it.passengers }
+        }.toSet()
+}
+
+// third solution
+fun TaxiPark.findSmartPassengers3(): Set<Passenger> =
+    allPassengers
+        .associateWith { p -> trips.filter { t -> p in t.passengers } }
+        .filterValues { group ->
+            val (withDiscounts, withoutDiscounts) = group.partition { it.discount != null }
+            withDiscounts.size > withoutDiscounts.size
+        }.keys
+
+// fourth solution
+fun TaxiPark.findSmartPassengers4(): Set<Passenger> =
+    allPassengers.filter { p ->
+        val withDiscounts = trips.count { t -> p in t.passengers && t.discount != null }
+        val withoutDiscounts = trips.count { t -> p in t.passengers && t.discount == null }
+        withDiscounts > withoutDiscounts
+    }.toSet()
 
 
 /*
@@ -75,6 +116,18 @@ fun TaxiPark.findTheMostFrequentTripDurationPeriod(): IntRange? {
 
     return null
 }
+
+// another solution
+fun TaxiPark.findTheMostFrequentTripDurationPeriod2(): IntRange? =
+    trips
+        .groupBy {
+            val start = it.duration / 10 * 10
+            val end = start + 9
+            start..end
+        }
+        .toList()
+        .maxByOrNull { (_, group) -> group.size }
+        ?.first
 
 /*
  * Task #6.
@@ -92,4 +145,19 @@ fun TaxiPark.checkParetoPrinciple(): Boolean {
         .sortedDescending()
 
     return incomePerDriver.take(numberOfTopDrivers).sum() >= 0.8 * allIncome
+}
+
+// another (almost same) solution
+fun TaxiPark.checkParetoPrinciple2(): Boolean {
+    if (trips.isEmpty()) return false
+
+    val totalIncome = trips.sumOf { it.cost } // sumByDouble for Coursera as they use an older version of Kotlin
+    val numberOfTopDrivers = (0.2 * allDrivers.size).toInt()
+
+    val sortedDriversIncome = trips
+        .groupBy(Trip::driver)
+        .map { (_, tripsByDriver) -> tripsByDriver.sumOf(Trip::cost) }  // sumByDouble for Coursera as they use an older version of Kotlin
+        .sortedDescending()
+
+    return sortedDriversIncome.take(numberOfTopDrivers).sum() >= 0.8 * totalIncome
 }
