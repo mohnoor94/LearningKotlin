@@ -1,6 +1,6 @@
-package `080_object_oriented`
+package `500_neat_features`
 
-import `080_object_oriented`.Digit.*
+import `500_neat_features`.Digit.*
 
 // We can override some specific operators in Kotlin using:
 // - specific names.
