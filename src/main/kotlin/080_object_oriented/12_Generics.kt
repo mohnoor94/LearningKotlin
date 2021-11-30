@@ -37,7 +37,7 @@ interface NotNullableList<E : Any> { // not nullable interface since E is extend
 interface NumbersList<E : Number>
 
 // Multiple constraints for the type: use `where`
-fun <T> ensureTrainlingPeriod(seq: T) where T : CharSequence, T : Appendable {
+fun <T> ensureTrailingPeriod(seq: T) where T : CharSequence, T : Appendable {
     if (!seq.endsWith('.')) seq.append('.')
 }
 
